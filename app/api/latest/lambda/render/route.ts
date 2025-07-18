@@ -14,7 +14,7 @@ import {
  */
 const LAMBDA_CONFIG = {
   FUNCTION_NAME: LAMBDA_FUNCTION_NAME,
-  FRAMES_PER_LAMBDA: 100,
+  FRAMES_PER_LAMBDA: 50, // Меньше кадров на Lambda = больше параллельности
   MAX_RETRIES: 2,
   CODEC: "h264" as const,
 } as const;
@@ -86,6 +86,9 @@ export const POST = executeApi<RenderMediaOnLambdaOutput, typeof RenderRequest>(
         },
         maxRetries: LAMBDA_CONFIG.MAX_RETRIES,
         everyNthFrame: 1,
+        // Настройки для ускорения
+        concurrencyPerLambda: 1, // Максимальная параллельность
+        deleteAfter: "1-day", // Автоудаление через день
       });
 
       console.log("🎉 LAMBDA RENDER RESULT:", JSON.stringify(result, null, 2));

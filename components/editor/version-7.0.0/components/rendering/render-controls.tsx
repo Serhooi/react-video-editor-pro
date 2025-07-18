@@ -1,5 +1,5 @@
 import React from "react";
-import { Download, Loader2, Bell, Save } from "lucide-react";
+import { Download, Loader2, Bell, Save, Minimize2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -7,6 +7,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { formatDistanceToNow } from "date-fns";
+import { RenderProgressModal } from "./render-progress-modal";
 
 /**
  * Interface representing a single video render attempt
@@ -58,8 +59,19 @@ const RenderControls: React.FC<RenderControlsProps> = ({
 }) => {
   // Store multiple renders
   const [renders, setRenders] = React.useState<RenderItem[]>([]);
+  const [showProgressModal, setShowProgressModal] = React.useState(false);
   // Track if there are new renders
   const [hasNewRender, setHasNewRender] = React.useState(false);
+
+  // Show modal when rendering starts
+  React.useEffect(() => {
+    if (state.status === "rendering" || state.status === "invoking") {
+      setShowProgressModal(true);
+    } else if (state.status === "done" || state.status === "error") {
+      // Keep modal open for a few seconds after completion
+      setTimeout(() => setShowProgressModal(false), 3000);
+    }
+  }, [state.status]);
 
   // Add new render to the list when completed
   React.useEffect(() => {
@@ -239,6 +251,15 @@ const RenderControls: React.FC<RenderControlsProps> = ({
           `Render Video`
         )}
       </Button>
+
+      {/* Progress Modal */}
+      {showProgressModal && (
+        <RenderProgressModal
+          state={state}
+          onClose={() => setShowProgressModal(false)}
+          onDownload={handleDownload}
+        />
+      )}
     </>
   );
 };
