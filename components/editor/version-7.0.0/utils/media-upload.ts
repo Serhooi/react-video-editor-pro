@@ -14,10 +14,18 @@ import { UserMediaItem, addMediaItem } from "./indexdb";
  * Uploads a file to the server and stores the reference in IndexedDB
  */
 export const uploadMediaFile = async (file: File): Promise<UserMediaItem> => {
+  console.log("📤 STARTING FILE UPLOAD");
+  console.log("📤 File:", file.name, file.size, "bytes", file.type);
+  
   try {
     // Generate thumbnail and get duration
+    console.log("📤 Generating thumbnail...");
     const thumbnail = await generateThumbnail(file);
+    console.log("📤 Thumbnail generated:", thumbnail ? "✅" : "❌");
+    
+    console.log("📤 Getting media duration...");
     const duration = await getMediaDuration(file);
+    console.log("📤 Duration:", duration);
 
     // Determine file type
     let fileType: "video" | "image" | "audio";
@@ -28,29 +36,51 @@ export const uploadMediaFile = async (file: File): Promise<UserMediaItem> => {
     } else if (file.type.startsWith("audio/")) {
       fileType = "audio";
     } else {
+      console.error("📤 Unsupported file type:", file.type);
       throw new Error("Unsupported file type");
     }
+    console.log("📤 File type determined:", fileType);
 
     // Get user ID
     const userId = getUserId();
+    console.log("📤 User ID:", userId);
 
     // Create form data for upload
+    console.log("📤 Creating FormData...");
     const formData = new FormData();
     formData.append("file", file);
     formData.append("userId", userId);
+    console.log("📤 FormData created");
 
     // Upload file to server
+    console.log("📤 Uploading to server...");
     const response = await fetch("/api/latest/local-media/upload", {
       method: "POST",
       body: formData,
     });
 
+    console.log("📤 Server response status:", response.status);
+    console.log("📤 Server response ok:", response.ok);
+
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Failed to upload file");
+      console.error("📤 Upload failed with status:", response.status);
+      try {
+        const errorData = await response.json();
+        console.error("📤 Error data:", errorData);
+        throw new Error(errorData.error || "Failed to upload file");
+      } catch (parseError) {
+        console.error("📤 Failed to parse error response:", parseError);
+        const errorText = await response.text();
+        console.error("📤 Raw error response:", errorText);
+        throw new Error(`Upload failed with status ${response.status}: ${errorText}`);
+      }
     }
 
-    const { id, serverPath, size } = await response.json();
+    console.log("📤 Parsing successful response...");
+    const responseData = await response.json();
+    console.log("📤 Response data:", responseData);
+    
+    const { id, serverPath, size } = responseData;
 
     // Create media item for IndexedDB
     const mediaItem: UserMediaItem = {
