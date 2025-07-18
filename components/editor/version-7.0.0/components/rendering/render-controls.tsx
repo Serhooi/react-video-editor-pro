@@ -75,13 +75,27 @@ const RenderControls: React.FC<RenderControlsProps> = ({
       ]);
       setHasNewRender(true);
     } else if (state.status === "error") {
+      let errorMessage = "Failed to render video. Please try again.";
+      
+      // Provide more specific error messages
+      if (state.error?.message) {
+        if (state.error.message.includes("AWS credentials not configured")) {
+          errorMessage = "❌ AWS not configured. Please set up AWS Lambda for video rendering.";
+        } else if (state.error.message.includes("AWS Secret Access Key missing")) {
+          errorMessage = "❌ AWS credentials incomplete. Please add AWS Secret Access Key.";
+        } else if (state.error.message.includes("No render found")) {
+          errorMessage = "❌ Render process lost. Please try again.";
+        } else {
+          errorMessage = state.error.message;
+        }
+      }
+      
       setRenders((prev) => [
         {
           timestamp: new Date(),
           id: crypto.randomUUID(),
           status: "error",
-          error:
-            state.error?.message || "Failed to render video. Please try again.",
+          error: errorMessage,
         },
         ...prev,
       ]);
@@ -200,7 +214,12 @@ const RenderControls: React.FC<RenderControlsProps> = ({
       </Popover>
 
       <Button
-        onClick={handleRender}
+        onClick={() => {
+          console.log("🔥 Render button clicked!");
+          console.log("🔥 handleRender function:", handleRender);
+          console.log("🔥 Current state:", state);
+          handleRender();
+        }}
         size="sm"
         variant="outline"
         disabled={state.status === "rendering" || state.status === "invoking"}

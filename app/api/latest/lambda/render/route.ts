@@ -30,7 +30,14 @@ const validateAwsCredentials = () => {
     !process.env.REMOTION_AWS_ACCESS_KEY_ID
   ) {
     throw new TypeError(
-      "Set up Remotion Lambda to render videos. See the README.md for how to do so."
+      "❌ AWS credentials not configured! To enable video rendering:\n\n" +
+      "1. Create an AWS account\n" +
+      "2. Get AWS Access Key and Secret Key\n" +
+      "3. Add them to Vercel environment variables:\n" +
+      "   - REMOTION_AWS_ACCESS_KEY_ID\n" +
+      "   - REMOTION_AWS_SECRET_ACCESS_KEY\n" +
+      "4. Deploy Lambda function using: npm run deploy\n\n" +
+      "See README.md for detailed setup instructions."
     );
   }
   if (
@@ -38,7 +45,7 @@ const validateAwsCredentials = () => {
     !process.env.REMOTION_AWS_SECRET_ACCESS_KEY
   ) {
     throw new TypeError(
-      "The environment variable REMOTION_AWS_SECRET_ACCESS_KEY is missing. Add it to your .env file."
+      "❌ AWS Secret Access Key missing! Add REMOTION_AWS_SECRET_ACCESS_KEY to your environment variables."
     );
   }
 };
@@ -59,7 +66,12 @@ export const POST = executeApi<RenderMediaOnLambdaOutput, typeof RenderRequest>(
     validateAwsCredentials();
 
     try {
-      console.log("Rendering media on Lambda....");
+      console.log("🚀 LAMBDA RENDER STARTED!");
+      console.log("🚀 Function Name:", LAMBDA_CONFIG.FUNCTION_NAME);
+      console.log("🚀 Region:", REGION);
+      console.log("🚀 Site Name:", SITE_NAME);
+      console.log("🚀 Composition:", body.id);
+      
       const result = await renderMediaOnLambda({
         codec: LAMBDA_CONFIG.CODEC,
         functionName: LAMBDA_CONFIG.FUNCTION_NAME,
@@ -76,8 +88,16 @@ export const POST = executeApi<RenderMediaOnLambdaOutput, typeof RenderRequest>(
         everyNthFrame: 1,
       });
 
-      console.log("Render result:", JSON.stringify(result, null, 2));
-      return result;
+      console.log("🎉 LAMBDA RENDER RESULT:", JSON.stringify(result, null, 2));
+      
+      // Ensure bucketName is included in the response
+      const response = {
+        ...result,
+        bucketName: process.env.REMOTION_AWS_BUCKET_NAME || "remotion-render-1751478249177"
+      };
+      
+      console.log("🎉 FINAL RESPONSE:", JSON.stringify(response, null, 2));
+      return response;
     } catch (error) {
       console.error("Error in renderMediaOnLambda:", error);
       throw error;

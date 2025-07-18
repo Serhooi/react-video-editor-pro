@@ -58,7 +58,11 @@ export const useRendering = (
 
   // Main function to handle the rendering process
   const renderMedia = useCallback(async () => {
-    console.log(`Starting renderMedia process using ${renderType}`);
+    console.log("🚀 renderMedia called!");
+    console.log(`🚀 Starting renderMedia process using ${renderType}`);
+    console.log("🚀 Input props:", inputProps);
+    console.log("🚀 ID:", id);
+    
     setState({
       status: "invoking",
     });

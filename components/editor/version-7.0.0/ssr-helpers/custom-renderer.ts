@@ -35,7 +35,12 @@ export async function startRendering(
   compositionId: string,
   inputProps: Record<string, unknown>
 ) {
+  console.log("🎥 CUSTOM RENDERER STARTED!");
+  console.log("🎥 Composition ID:", compositionId);
+  console.log("🎥 Input props:", inputProps);
+  
   const renderId = uuidv4();
+  console.log("🎥 Generated render ID:", renderId);
 
   // Initialize render state
   saveRenderState(renderId, {

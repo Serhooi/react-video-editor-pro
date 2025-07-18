@@ -6,8 +6,9 @@ import { startRendering } from "@/components/editor/version-7.0.0/ssr-helpers/cu
  * POST endpoint handler for rendering media using Remotion SSR
  */
 export const POST = executeApi(RenderRequest, async (req, body) => {
-  console.log("Received body:", JSON.stringify(body, null, 2));
-  console.log("inputProps:", JSON.stringify(body.inputProps, null, 2));
+  console.log("🎬 SSR RENDER API CALLED!");
+  console.log("🎬 Received body:", JSON.stringify(body, null, 2));
+  console.log("🎬 inputProps:", JSON.stringify(body.inputProps, null, 2));
 
   try {
     // Start the rendering process using our custom renderer

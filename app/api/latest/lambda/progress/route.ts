@@ -22,10 +22,17 @@ import {
 export const POST = executeApi<ProgressResponse, typeof ProgressRequest>(
   ProgressRequest,
   async (req, body) => {
-    console.log("Progress request", { body });
-    console.log("Bucket name", { bucketName: body.bucketName });
+    console.log("🔄 LAMBDA PROGRESS CHECK");
+    console.log("🔄 Render ID:", body.id);
+    console.log("🔄 Bucket name:", body.bucketName);
+    console.log("🔄 Function name:", LAMBDA_FUNCTION_NAME);
+    console.log("🔄 Region:", REGION);
+    
+    const bucketName = body.bucketName || process.env.REMOTION_AWS_BUCKET_NAME || "remotion-render-1751478249177";
+    console.log("🔄 Using bucket name:", bucketName);
+    
     const renderProgress = await getRenderProgress({
-      bucketName: body.bucketName,
+      bucketName: bucketName,
       functionName: LAMBDA_FUNCTION_NAME,
       region: REGION as AwsRegion,
       renderId: body.id,
