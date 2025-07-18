@@ -71,6 +71,7 @@ export const POST = executeApi<RenderMediaOnLambdaOutput, typeof RenderRequest>(
       console.log("🚀 Region:", REGION);
       console.log("🚀 Site Name:", SITE_NAME);
       console.log("🚀 Composition:", body.id);
+      console.log("🚀 Input Props:", JSON.stringify(body.inputProps, null, 2));
       
       const result = await renderMediaOnLambda({
         codec: LAMBDA_CONFIG.CODEC,

@@ -18,26 +18,62 @@ const makeRequest = async <Res>(
   endpoint: string,
   body: unknown
 ): Promise<Res> => {
-  console.log(`Making request to ${endpoint}`, { body });
-  const result = await fetch(endpoint, {
-    method: "post",
-    body: JSON.stringify(body),
-    headers: {
-      "content-type": "application/json",
-    },
-  });
-  const json = (await result.json()) as ApiResponse<Res>;
-  console.log(`Response received from ${endpoint}`, { json });
-  if (json.type === "error") {
-    console.error(`Error in response from ${endpoint}:`, json.message);
-    throw new Error(json.message);
-  }
+  console.log(`🌐 Making request to ${endpoint}`, { body });
+  
+  try {
+    const result = await fetch(endpoint, {
+      method: "post",
+      body: JSON.stringify(body),
+      headers: {
+        "content-type": "application/json",
+      },
+    });
+    
+    console.log(`🌐 Response status: ${result.status}`);
+    console.log(`🌐 Response headers:`, Object.fromEntries(result.headers.entries()));
+    
+    // Check if response is ok
+    if (!result.ok) {
+      const errorText = await result.text();
+      console.error(`🌐 HTTP Error ${result.status}:`, errorText);
+      throw new Error(`HTTP ${result.status}: ${errorText || 'Unknown error'}`);
+    }
+    
+    // Get response text first to debug
+    const responseText = await result.text();
+    console.log(`🌐 Raw response text:`, responseText);
+    
+    // Check if response is empty
+    if (!responseText || responseText.trim() === '') {
+      throw new Error(`Empty response from ${endpoint}`);
+    }
+    
+    // Try to parse JSON
+    let json: ApiResponse<Res>;
+    try {
+      json = JSON.parse(responseText) as ApiResponse<Res>;
+    } catch (parseError) {
+      console.error(`🌐 JSON Parse Error:`, parseError);
+      console.error(`🌐 Response text that failed to parse:`, responseText);
+      throw new Error(`Invalid JSON response from ${endpoint}: ${responseText}`);
+    }
+    
+    console.log(`🌐 Parsed JSON response from ${endpoint}:`, json);
+    
+    if (json.type === "error") {
+      console.error(`🌐 API Error from ${endpoint}:`, json.message);
+      throw new Error(json.message);
+    }
 
-  if (!json.data) {
-    throw new Error(`No data received from ${endpoint}`);
-  }
+    if (!json.data) {
+      throw new Error(`No data received from ${endpoint}`);
+    }
 
-  return json.data;
+    return json.data;
+  } catch (error) {
+    console.error(`🌐 Request failed to ${endpoint}:`, error);
+    throw error;
+  }
 };
 
 export const renderVideo = async ({

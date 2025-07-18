@@ -18,19 +18,33 @@ export const executeApi =
   ) =>
   async (req: Request) => {
     try {
+      console.log("🔧 API Request received");
       const payload = await req.json();
+      console.log("🔧 Payload:", JSON.stringify(payload, null, 2));
+      
       const parsed = schema.parse(payload);
+      console.log("🔧 Schema validation passed");
+      
       const data = await handler(req, parsed);
-      return NextResponse.json({
+      console.log("🔧 Handler completed, data:", JSON.stringify(data, null, 2));
+      
+      const response = {
         type: "success",
         data: data,
-      });
+      };
+      console.log("🔧 Final API response:", JSON.stringify(response, null, 2));
+      
+      return NextResponse.json(response);
     } catch (err) {
-      return NextResponse.json(
-        { type: "error", message: (err as Error).message },
-        {
-          status: 500,
-        }
-      );
+      console.error("🔧 API Error:", err);
+      const errorResponse = { 
+        type: "error", 
+        message: (err as Error).message 
+      };
+      console.log("🔧 Error response:", JSON.stringify(errorResponse, null, 2));
+      
+      return NextResponse.json(errorResponse, {
+        status: 500,
+      });
     }
   };
