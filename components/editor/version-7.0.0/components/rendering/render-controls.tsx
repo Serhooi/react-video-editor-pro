@@ -1,5 +1,5 @@
 import React from "react";
-import { Download, Loader2, Bell, Save, Minimize2, X } from "lucide-react";
+import { Download, Loader2, Bell, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,

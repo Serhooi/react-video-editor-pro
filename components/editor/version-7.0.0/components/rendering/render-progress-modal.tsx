@@ -106,7 +106,7 @@ export const RenderProgressModal: React.FC<RenderProgressModalProps> = ({
                 <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
                   You can minimize this window and continue working.
                   <br />
-                  We'll notify you when rendering is complete.
+                  We&apos;ll notify you when rendering is complete.
                 </div>
               </>
             )}
