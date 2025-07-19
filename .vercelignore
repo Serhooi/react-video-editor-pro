@@ -1,0 +1,6 @@
+pages/api/import-figma.ts
+pages/
+*.log
+.env.local
+.next/
+node_modules/
