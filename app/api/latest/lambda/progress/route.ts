@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AwsRegion, getRenderProgress } from "@remotion/lambda/client";
-import { z } from 'zod';
 
 import {
   ProgressRequest,
