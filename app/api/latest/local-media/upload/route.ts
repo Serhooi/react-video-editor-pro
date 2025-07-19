@@ -1,17 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import { existsSync } from 'fs';
-import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
 /**
- * Handles media file uploads
+ * Handles media file uploads to AWS S3
  * 
  * This API endpoint:
  * 1. Receives a file and user ID
- * 2. Creates a user directory if it doesn't exist
- * 3. Saves the file to the user's directory
- * 4. Returns the file path and ID
+ * 2. Uploads the file to S3 bucket
+ * 3. Returns the S3 URL and file information
  */
 export async function POST(request: NextRequest) {
   console.log("📁 UPLOAD API CALLED!");
@@ -34,47 +31,53 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Create user directory if it doesn't exist
-    // On Vercel, we need to use /tmp directory as it's the only writable location
-    const userDir = path.join('/tmp', 'users', userId);
-    console.log("📁 User directory:", userDir);
-    
-    if (!existsSync(userDir)) {
-      console.log("📁 Creating user directory...");
-      await mkdir(userDir, { recursive: true });
-      console.log("📁 User directory created");
-    } else {
-      console.log("📁 User directory already exists");
-    }
+    // Initialize S3 client using the same credentials as Lambda
+    const s3Client = new S3Client({
+      region: process.env.AWS_REGION || 'us-east-1',
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID || process.env.REMOTION_AWS_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || process.env.REMOTION_AWS_SECRET_ACCESS_KEY!,
+      },
+    });
     
     // Generate a unique filename
     const fileId = uuidv4();
     const fileExtension = file.name.split('.').pop();
     const fileName = `${fileId}.${fileExtension}`;
-    const filePath = path.join(userDir, fileName);
+    const s3Key = `media/${userId}/${fileName}`;
     
-    console.log("📁 Generated filename:", fileName);
-    console.log("📁 Full file path:", filePath);
+    console.log("📁 Generated S3 key:", s3Key);
     
-    // Convert file to buffer and save it
+    // Convert file to buffer
     console.log("📁 Converting file to buffer...");
     const buffer = Buffer.from(await file.arrayBuffer());
     console.log("📁 Buffer size:", buffer.length);
     
-    console.log("📁 Writing file to disk...");
-    await writeFile(filePath, buffer);
-    console.log("📁 File written successfully!");
+    // Upload to S3
+    console.log("📁 Uploading to S3...");
+    const bucketName = process.env.AWS_S3_BUCKET || 'video-editor-media';
     
-    // Return the file information
-    // Since files are in /tmp, we need to serve them through an API endpoint
-    const publicPath = `/api/latest/local-media/serve/${userId}/${fileName}`;
-    console.log("📁 Public path:", publicPath);
+    const uploadCommand = new PutObjectCommand({
+      Bucket: bucketName,
+      Key: s3Key,
+      Body: buffer,
+      ContentType: file.type,
+      ContentDisposition: 'inline',
+      CacheControl: 'max-age=31536000', // Cache for 1 year
+    });
+    
+    await s3Client.send(uploadCommand);
+    console.log("📁 File uploaded to S3 successfully!");
+    
+    // Generate the public URL
+    const publicUrl = `https://${bucketName}.s3.${process.env.AWS_REGION || 'us-east-1'}.amazonaws.com/${s3Key}`;
+    console.log("📁 Public URL:", publicUrl);
     
     const response = {
       success: true,
       id: fileId,
       fileName: file.name,
-      serverPath: publicPath,
+      serverPath: publicUrl,
       size: file.size,
       type: file.type,
     };
@@ -84,7 +87,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error uploading file:', error);
     return NextResponse.json(
-      { error: 'Failed to upload file' },
+      { error: 'Failed to upload file', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

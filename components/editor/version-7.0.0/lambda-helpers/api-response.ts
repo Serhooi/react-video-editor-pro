@@ -19,7 +19,23 @@ export const executeApi =
   async (req: Request) => {
     try {
       console.log("🔧 API Request received");
-      const payload = await req.json();
+      
+      // Check if request has body
+      const text = await req.text();
+      console.log("🔧 Raw request text:", text);
+      
+      if (!text || text.trim() === '') {
+        throw new Error("Request body is empty");
+      }
+      
+      let payload;
+      try {
+        payload = JSON.parse(text);
+      } catch (parseError) {
+        console.error("🔧 JSON Parse Error:", parseError);
+        throw new Error(`Invalid JSON: "${text}"`);
+      }
+      
       console.log("🔧 Payload:", JSON.stringify(payload, null, 2));
       
       const parsed = schema.parse(payload);
