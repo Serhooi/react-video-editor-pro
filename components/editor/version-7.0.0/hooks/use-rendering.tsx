@@ -63,6 +63,29 @@ export const useRendering = (
     console.log("🚀 Input props:", inputProps);
     console.log("🚀 ID:", id);
     
+    // Validate inputProps
+    if (!inputProps) {
+      console.error("🚀 ERROR: inputProps is null/undefined");
+      setState({
+        status: "error",
+        error: new Error("inputProps is required"),
+        renderId: null,
+      });
+      return;
+    }
+    
+    if (!inputProps.overlays || inputProps.overlays.length === 0) {
+      console.warn("🚀 WARNING: No overlays in inputProps");
+    }
+    
+    console.log("🚀 InputProps details:", {
+      overlaysCount: inputProps.overlays?.length || 0,
+      durationInFrames: inputProps.durationInFrames,
+      fps: inputProps.fps,
+      width: inputProps.width,
+      height: inputProps.height,
+    });
+    
     setState({
       status: "invoking",
     });

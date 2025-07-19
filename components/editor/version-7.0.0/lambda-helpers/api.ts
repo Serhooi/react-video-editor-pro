@@ -83,17 +83,38 @@ export const renderVideo = async ({
   id: string;
   inputProps: z.infer<typeof CompositionProps>;
 }) => {
-  console.log("Rendering video", { id, inputProps });
+  console.log("🎬 Rendering video", { id, inputProps });
+  
+  // Validate inputProps before sending
+  if (!inputProps) {
+    throw new Error("inputProps is required");
+  }
+  
+  if (!inputProps.overlays) {
+    console.warn("⚠️ No overlays in inputProps");
+  }
+  
+  console.log("🎬 InputProps validation:", {
+    hasOverlays: !!inputProps.overlays,
+    overlaysCount: inputProps.overlays?.length || 0,
+    durationInFrames: inputProps.durationInFrames,
+    fps: inputProps.fps,
+    width: inputProps.width,
+    height: inputProps.height,
+  });
+  
   const body: z.infer<typeof RenderRequest> = {
     id,
     inputProps,
   };
+  
+  console.log("🎬 Request body:", JSON.stringify(body, null, 2));
 
   const response = await makeRequest<RenderMediaOnLambdaOutput>(
     "/api/latest/lambda/render",
     body
   );
-  console.log("Video render response", { response });
+  console.log("🎬 Video render response", { response });
   return response;
 };
 
