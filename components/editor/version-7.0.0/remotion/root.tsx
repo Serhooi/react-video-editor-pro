@@ -1,4 +1,4 @@
-import { Composition } from "remotion";
+import { Composition, getInputProps } from "remotion";
 import { Main } from "./main";
 import { COMP_NAME, DURATION_IN_FRAMES, FPS } from "../constants";
 
@@ -7,13 +7,36 @@ import { COMP_NAME, DURATION_IN_FRAMES, FPS } from "../constants";
  * Sets up the composition and provides default props.
  */
 export const RemotionRoot: React.FC = () => {
+  // Get input props passed from the render request
+  const inputProps = getInputProps();
+  
+  console.log("🎬 RemotionRoot: Received inputProps:", inputProps);
+  
+  // Use inputProps if available, otherwise use defaults
+  const {
+    overlays = [],
+    durationInFrames = DURATION_IN_FRAMES,
+    fps = FPS,
+    width = 1920,
+    height = 1920,
+    src = "",
+  } = inputProps || {};
+  
+  console.log("🎬 RemotionRoot: Using values:", {
+    overlaysCount: overlays.length,
+    durationInFrames,
+    fps,
+    width,
+    height,
+  });
+
   const defaultMyCompProps: any = {
-    overlays: [],
-    durationInFrames: DURATION_IN_FRAMES,
-    fps: FPS,
-    width: 1920,
-    height: 1920,
-    src: "",
+    overlays,
+    durationInFrames,
+    fps,
+    width,
+    height,
+    src,
     setSelectedOverlayId: () => {},
     selectedOverlayId: null,
     changeOverlay: () => {},
@@ -24,10 +47,10 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id={COMP_NAME}
         component={Main}
-        durationInFrames={DURATION_IN_FRAMES}
-        fps={FPS}
-        width={1920}
-        height={1920}
+        durationInFrames={durationInFrames}
+        fps={fps}
+        width={width}
+        height={height}
         /**
          * Dynamically calculates the video metadata based on the composition props.
          * These values will be reflected in the Remotion player/preview.
@@ -37,10 +60,11 @@ export const RemotionRoot: React.FC = () => {
          * @returns An object containing the video dimensions and duration
          */
         calculateMetadata={async ({ props }) => {
+          console.log("🎬 calculateMetadata: props received:", props);
           return {
-            durationInFrames: props.durationInFrames,
-            width: props.width,
-            height: props.height,
+            durationInFrames: props.durationInFrames || durationInFrames,
+            width: props.width || width,
+            height: props.height || height,
           };
         }}
         defaultProps={defaultMyCompProps}
