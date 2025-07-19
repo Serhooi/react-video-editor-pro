@@ -23,7 +23,7 @@ export const RemotionRoot: React.FC = () => {
   } = inputProps || {};
   
   console.log("🎬 RemotionRoot: Using values:", {
-    overlaysCount: overlays.length,
+    overlaysCount: Array.isArray(overlays) ? overlays.length : 0,
     durationInFrames,
     fps,
     width,
