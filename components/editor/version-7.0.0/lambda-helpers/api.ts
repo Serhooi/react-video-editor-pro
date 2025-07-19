@@ -150,35 +150,72 @@ export const getProgress = async ({
   id: string;
   bucketName: string;
 }) => {
-  console.log("🔄 Getting progress", { id, bucketName });
+  console.log("🔄 Getting progress with GET method", { id, bucketName });
   
   if (!id) {
     throw new Error("Render ID is required for progress check");
   }
   
   if (!bucketName) {
-    throw new Error("Bucket name is required for progress check");
+    console.warn("🔄 No bucket name provided, will use default");
   }
   
-  // First test with debug endpoint
-  console.log("🔄 Testing with debug endpoint first...");
   try {
-    await debugProgress(id, bucketName);
-  } catch (debugError) {
-    console.error("🔄 Debug test failed:", debugError);
-  }
-  
-  const body: z.infer<typeof ProgressRequest> = {
-    id,
-    bucketName,
-  };
-  
-  console.log("🔄 Progress request body:", JSON.stringify(body, null, 2));
+    // Use GET request with URL parameters instead of POST with body
+    const params = new URLSearchParams({
+      id: id,
+      ...(bucketName && { bucketName: bucketName })
+    });
+    
+    const url = `/api/latest/lambda/progress-get?${params.toString()}`;
+    console.log("🔄 GET request URL:", url);
+    
+    const result = await fetch(url, {
+      method: "GET",
+      headers: {
+        "content-type": "application/json",
+      },
+    });
+    
+    console.log(`🔄 Response status: ${result.status}`);
+    
+    if (!result.ok) {
+      const errorText = await result.text();
+      console.error(`🔄 HTTP Error ${result.status}:`, errorText);
+      throw new Error(`HTTP ${result.status}: ${errorText || 'Unknown error'}`);
+    }
+    
+    const responseText = await result.text();
+    console.log(`🔄 Raw response text:`, responseText);
+    
+    if (!responseText || responseText.trim() === '') {
+      throw new Error(`Empty response from progress endpoint`);
+    }
+    
+    let json;
+    try {
+      json = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error(`🔄 JSON Parse Error:`, parseError);
+      throw new Error(`Invalid JSON response: ${responseText}`);
+    }
+    
+    console.log(`🔄 Parsed JSON response:`, json);
+    
+    if (json.type === "error") {
+      console.error(`🔄 API Error:`, json.message);
+      throw new Error(json.message);
+    }
 
-  const response = await makeRequest<ProgressResponse>(
-    "/api/latest/lambda/progress",
-    body
-  );
-  console.log("🔄 Progress response", { response });
-  return response;
+    if (!json.data) {
+      throw new Error(`No data received from progress endpoint`);
+    }
+
+    console.log("🔄 Progress response", { response: json.data });
+    return json.data;
+    
+  } catch (error) {
+    console.error(`🔄 Progress request failed:`, error);
+    throw error;
+  }
 };
