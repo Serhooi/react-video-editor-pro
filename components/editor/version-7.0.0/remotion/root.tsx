@@ -12,15 +12,13 @@ export const RemotionRoot: React.FC = () => {
   
   console.log("🎬 RemotionRoot: Received inputProps:", inputProps);
   
-  // Use inputProps if available, otherwise use defaults
-  const {
-    overlays = [],
-    durationInFrames = DURATION_IN_FRAMES,
-    fps = FPS,
-    width = 1920,
-    height = 1920,
-    src = "",
-  } = inputProps || {};
+  // Use inputProps if available, otherwise use defaults with proper type casting
+  const overlays = (inputProps as any)?.overlays || [];
+  const durationInFrames = Number((inputProps as any)?.durationInFrames) || DURATION_IN_FRAMES;
+  const fps = Number((inputProps as any)?.fps) || FPS;
+  const width = Number((inputProps as any)?.width) || 1920;
+  const height = Number((inputProps as any)?.height) || 1920;
+  const src = (inputProps as any)?.src || "";
   
   console.log("🎬 RemotionRoot: Using values:", {
     overlaysCount: Array.isArray(overlays) ? overlays.length : 0,
@@ -62,9 +60,9 @@ export const RemotionRoot: React.FC = () => {
         calculateMetadata={async ({ props }) => {
           console.log("🎬 calculateMetadata: props received:", props);
           return {
-            durationInFrames: props.durationInFrames || durationInFrames,
-            width: props.width || width,
-            height: props.height || height,
+            durationInFrames: Number(props.durationInFrames) || durationInFrames,
+            width: Number(props.width) || width,
+            height: Number(props.height) || height,
           };
         }}
         defaultProps={defaultMyCompProps}
