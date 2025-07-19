@@ -3,7 +3,6 @@ import type { RenderMediaOnLambdaOutput } from "@remotion/lambda/client";
 
 import {
   RenderRequest,
-  ProgressRequest,
   ProgressResponse,
 } from "@/components/editor/version-7.0.0/types";
 import { CompositionProps } from "@/components/editor/version-7.0.0/types";
