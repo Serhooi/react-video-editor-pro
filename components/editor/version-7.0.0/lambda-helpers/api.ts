@@ -118,6 +118,31 @@ export const renderVideo = async ({
   return response;
 };
 
+// Debug function to test request sending
+export const debugProgress = async (id: string, bucketName: string) => {
+  console.log("🐛 DEBUG: Testing progress request", { id, bucketName });
+  
+  const body = { id, bucketName };
+  console.log("🐛 DEBUG: Request body:", JSON.stringify(body, null, 2));
+  
+  try {
+    const response = await fetch("/api/debug-progress", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+    
+    const result = await response.json();
+    console.log("🐛 DEBUG: Response:", result);
+    return result;
+  } catch (error) {
+    console.error("🐛 DEBUG: Error:", error);
+    throw error;
+  }
+};
+
 export const getProgress = async ({
   id,
   bucketName,
@@ -133,6 +158,14 @@ export const getProgress = async ({
   
   if (!bucketName) {
     throw new Error("Bucket name is required for progress check");
+  }
+  
+  // First test with debug endpoint
+  console.log("🔄 Testing with debug endpoint first...");
+  try {
+    await debugProgress(id, bucketName);
+  } catch (debugError) {
+    console.error("🔄 Debug test failed:", debugError);
   }
   
   const body: z.infer<typeof ProgressRequest> = {
