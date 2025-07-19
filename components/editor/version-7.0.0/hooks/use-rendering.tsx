@@ -117,9 +117,17 @@ export const useRendering = (
 
       while (pending) {
         console.log(`Checking progress for renderId=${renderId}`);
+        console.log(`Using bucketName=${bucketName}`);
+        
+        const progressBucketName = typeof bucketName === "string" && bucketName 
+          ? bucketName 
+          : process.env.NEXT_PUBLIC_REMOTION_AWS_BUCKET_NAME || "remotion-render-1751478249177";
+          
+        console.log(`Final bucketName for progress=${progressBucketName}`);
+        
         const result = await getProgress({
           id: renderId,
-          bucketName: typeof bucketName === "string" ? bucketName : "",
+          bucketName: progressBucketName,
         });
         console.log("result", result);
         switch (result.type) {

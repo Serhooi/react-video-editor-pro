@@ -125,16 +125,27 @@ export const getProgress = async ({
   id: string;
   bucketName: string;
 }) => {
-  console.log("Getting progress", { id, bucketName });
+  console.log("🔄 Getting progress", { id, bucketName });
+  
+  if (!id) {
+    throw new Error("Render ID is required for progress check");
+  }
+  
+  if (!bucketName) {
+    throw new Error("Bucket name is required for progress check");
+  }
+  
   const body: z.infer<typeof ProgressRequest> = {
     id,
     bucketName,
   };
+  
+  console.log("🔄 Progress request body:", JSON.stringify(body, null, 2));
 
   const response = await makeRequest<ProgressResponse>(
     "/api/latest/lambda/progress",
     body
   );
-  console.log("Progress response", { response });
+  console.log("🔄 Progress response", { response });
   return response;
 };
