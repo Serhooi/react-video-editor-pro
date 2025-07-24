@@ -211,15 +211,15 @@ export const getMediaDuration = async (
  */
 export const deleteMediaFile = async (
   userId: string,
-  filePath: string
+  fileId: string
 ): Promise<boolean> => {
   try {
-    const response = await fetch("/api/media/delete", {
+    const response = await fetch("/api/latest/local-media/delete", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ userId, filePath }),
+      body: JSON.stringify({ userId, fileId }),
     });
 
     if (!response.ok) {
