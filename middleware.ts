@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  // Handle CORS for API routes
+  const response = NextResponse.next();
+  
+  // Add CORS headers for API routes
   if (request.nextUrl.pathname.startsWith('/api/')) {
-    const response = NextResponse.next();
-    
-    // Add CORS headers
     response.headers.set('Access-Control-Allow-Origin', '*');
     response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -14,13 +13,19 @@ export function middleware(request: NextRequest) {
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 200, headers: response.headers });
     }
-    
-    return response;
   }
   
-  return NextResponse.next();
+  // Add headers to allow cross-origin embedding for all routes
+  response.headers.set('Cross-Origin-Resource-Policy', 'cross-origin');
+  response.headers.set('Cross-Origin-Embedder-Policy', 'unsafe-none');
+  response.headers.set('X-Frame-Options', 'ALLOWALL');
+  response.headers.set('Content-Security-Policy', 'frame-ancestors *;');
+  
+  return response;
 }
 
 export const config = {
-  matcher: '/api/:path*',
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico).*)',
+  ],
 };
