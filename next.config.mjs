@@ -22,7 +22,7 @@ const nextConfig = {
 
           {
             key: 'Content-Security-Policy',
-            value: "frame-ancestors * 'self' data: blob:; object-src 'none';"
+            value: "frame-ancestors *;"
           }
         ],
       },

@@ -19,7 +19,11 @@ export function middleware(request: NextRequest) {
   response.headers.set('Cross-Origin-Resource-Policy', 'cross-origin');
   response.headers.set('Cross-Origin-Embedder-Policy', 'unsafe-none');
   response.headers.delete('X-Frame-Options');
-  response.headers.set('Content-Security-Policy', "frame-ancestors * 'self' data: blob:; object-src 'none';");
+  response.headers.set('Content-Security-Policy', "frame-ancestors *;");
+  
+  // Force remove any blocking headers
+  response.headers.delete('X-Content-Type-Options');
+  response.headers.delete('Referrer-Policy');
   
   return response;
 }

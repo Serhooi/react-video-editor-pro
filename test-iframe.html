@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Editor Iframe Test</title>
+    <style>
+        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+        .test-container { max-width: 1200px; margin: 0 auto; }
+        .status { padding: 15px; margin: 10px 0; border-radius: 8px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        iframe { width: 100%; height: 600px; border: 1px solid #ddd; border-radius: 8px; }
+        .loading { text-align: center; padding: 50px; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎬 Video Editor Iframe Integration Test</h1>
+        
+        <div id="status" class="status info">
+            🔄 Testing iframe integration...
+        </div>
+
+        <div id="headers-info" class="status info">
+            📡 Checking server headers...
+        </div>
+
+        <h3>Live Iframe Test:</h3>
+        <iframe 
+            id="video-editor-iframe"
+            src="https://video-editor-ten-sand.vercel.app/versions/7.0.0?nocache=1"
+            frameborder="0"
+            allow="camera; microphone; fullscreen"
+            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals">
+            <div class="loading">Loading video editor...</div>
+        </iframe>
+    </div>
+
+    <script>
+        const iframe = document.getElementById('video-editor-iframe');
+        const statusDiv = document.getElementById('status');
+        const headersDiv = document.getElementById('headers-info');
+
+        // Test iframe loading
+        iframe.onload = function() {
+            statusDiv.className = 'status success';
+            statusDiv.innerHTML = '✅ Iframe loaded successfully! Video editor should be visible above.';
+        };
+
+        iframe.onerror = function() {
+            statusDiv.className = 'status error';
+            statusDiv.innerHTML = '❌ Iframe failed to load. Check console for details.';
+        };
+
+        // Check server headers
+        fetch('https://video-editor-ten-sand.vercel.app/versions/7.0.0', { method: 'HEAD' })
+            .then(response => {
+                const headers = {};
+                for (let [key, value] of response.headers.entries()) {
+                    headers[key] = value;
+                }
+                
+                let headerInfo = '<strong>Server Headers:</strong><br>';
+                headerInfo += `X-Frame-Options: ${headers['x-frame-options'] || 'Not set'}<br>`;
+                headerInfo += `Content-Security-Policy: ${headers['content-security-policy'] || 'Not set'}<br>`;
+                headerInfo += `Cross-Origin-Resource-Policy: ${headers['cross-origin-resource-policy'] || 'Not set'}`;
+                
+                headersDiv.innerHTML = headerInfo;
+                
+                if (!headers['x-frame-options'] || headers['x-frame-options'] === 'ALLOWALL') {
+                    headersDiv.className = 'status success';
+                } else {
+                    headersDiv.className = 'status error';
+                }
+            })
+            .catch(error => {
+                headersDiv.className = 'status error';
+                headersDiv.innerHTML = '❌ Could not check headers: ' + error.message;
+            });
+
+        // Timeout check
+        setTimeout(() => {
+            if (statusDiv.innerHTML.includes('Testing')) {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = '⏰ Iframe loading timeout. This might indicate X-Frame-Options blocking.';
+            }
+        }, 10000);
+    </script>
+</body>
+</html>
