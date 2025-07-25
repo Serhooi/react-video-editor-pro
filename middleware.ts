@@ -18,8 +18,8 @@ export function middleware(request: NextRequest) {
   // Add headers to allow cross-origin embedding for all routes
   response.headers.set('Cross-Origin-Resource-Policy', 'cross-origin');
   response.headers.set('Cross-Origin-Embedder-Policy', 'unsafe-none');
-  response.headers.set('X-Frame-Options', 'ALLOWALL');
-  response.headers.set('Content-Security-Policy', 'frame-ancestors *;');
+  response.headers.delete('X-Frame-Options');
+  response.headers.set('Content-Security-Policy', "frame-ancestors * 'self' data: blob:; object-src 'none';");
   
   return response;
 }

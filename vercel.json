@@ -11,13 +11,10 @@
           "key": "Cross-Origin-Embedder-Policy", 
           "value": "unsafe-none"
         },
-        {
-          "key": "X-Frame-Options",
-          "value": "ALLOWALL"
-        },
+
         {
           "key": "Content-Security-Policy",
-          "value": "frame-ancestors *;"
+          "value": "frame-ancestors * 'self' data: blob:; object-src 'none';"
         }
       ]
     },

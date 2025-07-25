@@ -16,12 +16,13 @@ const nextConfig = {
             value: 'unsafe-none'
           },
           {
-            key: 'X-Frame-Options',
-            value: 'ALLOWALL'
+            key: 'Referrer-Policy',
+            value: 'no-referrer-when-downgrade'
           },
+
           {
             key: 'Content-Security-Policy',
-            value: "frame-ancestors *;"
+            value: "frame-ancestors * 'self' data: blob:; object-src 'none';"
           }
         ],
       },
