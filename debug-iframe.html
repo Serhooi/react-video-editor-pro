@@ -26,6 +26,9 @@
     
     <h3>Test 3: Embed page</h3>
     <iframe id="iframe3" src="https://video-editor-ten-sand.vercel.app/embed"></iframe>
+    
+    <h3>Test 4: Simple static page</h3>
+    <iframe id="iframe4" src="https://video-editor-ten-sand.vercel.app/simple-test.html"></iframe>
 
     <script>
         const logs = document.getElementById('logs');
@@ -61,7 +64,8 @@
         iframe2.src = `https://video-editor-ten-sand.vercel.app/versions/7.0.0?t=${Date.now()}`;
         
         // Monitor iframe events
-        [iframe1, iframe2, iframe3].forEach((iframe, index) => {
+        const iframe4 = document.getElementById('iframe4');
+        [iframe1, iframe2, iframe3, iframe4].forEach((iframe, index) => {
             const name = `iframe${index + 1}`;
             
             iframe.onload = () => {
@@ -74,6 +78,20 @@
                 } catch (e) {
                     log(`ℹ️ ${name} content blocked (normal for cross-origin): ${e.message}`, 'info');
                 }
+                
+                // Check if iframe actually has content
+                setTimeout(() => {
+                    const rect = iframe.getBoundingClientRect();
+                    log(`📏 ${name} dimensions: ${rect.width}x${rect.height}`, 'info');
+                    
+                    if (iframe.contentWindow) {
+                        try {
+                            log(`🌐 ${name} contentWindow location: ${iframe.contentWindow.location.href}`, 'info');
+                        } catch (e) {
+                            log(`🌐 ${name} contentWindow location blocked: ${e.message}`, 'info');
+                        }
+                    }
+                }, 1000);
             };
             
             iframe.onerror = (e) => {
