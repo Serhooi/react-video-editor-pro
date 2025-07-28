@@ -60,7 +60,7 @@ export const POST = executeApi<RenderMediaOnLambdaOutput, typeof RenderRequest>(
   async (req, body) => {
     // Логирование свободного места в /tmp
     try {
-      const { execSync } = require("child_process");
+      const { execSync } = await import("child_process");
       const tmpSpace = execSync("df -h /tmp").toString();
       console.log("Свободное место в /tmp:\n", tmpSpace);
     } catch (e) {
