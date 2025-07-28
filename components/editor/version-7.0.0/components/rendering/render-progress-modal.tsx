@@ -1,5 +1,5 @@
 import React from "react";
-import { X, Minimize2, Maximize2, Download } from "lucide-react";
+import { X, Minimize2, Maximize2, Download, Clock, Zap, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 
@@ -15,12 +15,34 @@ export const RenderProgressModal: React.FC<RenderProgressModalProps> = ({
   onDownload,
 }) => {
   const [isMinimized, setIsMinimized] = React.useState(false);
+  const [startTime] = React.useState(Date.now());
+  const [elapsedTime, setElapsedTime] = React.useState(0);
+
+  // Update elapsed time every second
+  React.useEffect(() => {
+    if (state.status === "rendering" || state.status === "invoking") {
+      const interval = setInterval(() => {
+        setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [state.status, startTime]);
 
   if (!state || (state.status !== "rendering" && state.status !== "invoking" && state.status !== "done")) {
     return null;
   }
 
   const progress = Math.round((state.progress || 0) * 100);
+  
+  // Calculate estimated time remaining
+  const estimatedTimeRemaining = progress > 0 ? Math.floor((elapsedTime / progress) * (100 - progress)) : 0;
+  
+  // Format time
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -64,8 +86,12 @@ export const RenderProgressModal: React.FC<RenderProgressModalProps> = ({
           <div className="p-6 space-y-4">
             {state.status === "done" ? (
               <div className="text-center space-y-4">
-                <div className="text-green-600 dark:text-green-400">
-                  ✅ Rendering completed successfully!
+                <div className="flex items-center justify-center gap-2 text-green-600 dark:text-green-400">
+                  <CheckCircle className="w-5 h-5" />
+                  <span className="font-medium">Rendering completed successfully!</span>
+                </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  Total time: {formatTime(elapsedTime)}
                 </div>
                 {onDownload && state.url && (
                   <Button
@@ -87,8 +113,35 @@ export const RenderProgressModal: React.FC<RenderProgressModalProps> = ({
                   <Progress value={progress} className="w-full" />
                 </div>
 
-                <div className="text-center text-sm text-gray-600 dark:text-gray-400">
-                  {state.status === "invoking" ? "Preparing..." : "Processing..."}
+                {/* Status and timing info */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-center gap-2 text-sm">
+                    {state.status === "invoking" ? (
+                      <>
+                        <Zap className="w-4 h-4 text-blue-500 animate-pulse" />
+                        <span className="text-gray-600 dark:text-gray-400">Preparing render...</span>
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                        <span className="text-gray-600 dark:text-gray-400">Processing frames...</span>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Time information */}
+                  <div className="grid grid-cols-2 gap-4 text-xs">
+                    <div className="text-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                      <div className="text-gray-500 dark:text-gray-400">Elapsed</div>
+                      <div className="font-mono">{formatTime(elapsedTime)}</div>
+                    </div>
+                    <div className="text-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                      <div className="text-gray-500 dark:text-gray-400">Remaining</div>
+                      <div className="font-mono">
+                        {estimatedTimeRemaining > 0 ? formatTime(estimatedTimeRemaining) : '--'}
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 {state.renderId && (
