@@ -96,7 +96,7 @@ export const POST = executeApi<RenderMediaOnLambdaOutput, typeof RenderRequest>(
         maxRetries: LAMBDA_CONFIG.MAX_RETRIES,
         everyNthFrame: 1,
         // Настройки для ускорения
-        concurrencyPerLambda: 5, // Увеличиваем параллельность для ускорения
+        concurrencyPerLambda: 2, // Максимум для Lambda (2 CPU ядра)
         deleteAfter: "1-day", // Автоудаление через день
       });
 
