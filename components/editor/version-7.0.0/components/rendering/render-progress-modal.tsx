@@ -1,5 +1,5 @@
 import React from "react";
-import { X, Minimize2, Maximize2, Download, Clock, Zap, CheckCircle } from "lucide-react";
+import { X, Minimize2, Maximize2, Download, Zap, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 
