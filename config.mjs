@@ -5,6 +5,6 @@
 export const REGION = "us-east-1";
 
 export const SITE_NAME = "sams-site";
-export const RAM = 4096; // Увеличиваем RAM для ускорения
+export const RAM = 3008; // Максимум для бесплатного тарифа AWS
 export const DISK = 10240;
 export const TIMEOUT = 300; // Увеличиваем timeout для сложных рендеров
