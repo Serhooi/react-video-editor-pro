@@ -58,6 +58,14 @@ const validateAwsCredentials = () => {
 export const POST = executeApi<RenderMediaOnLambdaOutput, typeof RenderRequest>(
   RenderRequest,
   async (req, body) => {
+    // Логирование свободного места в /tmp
+    try {
+      const { execSync } = require("child_process");
+      const tmpSpace = execSync("df -h /tmp").toString();
+      console.log("Свободное место в /tmp:\n", tmpSpace);
+    } catch (e) {
+      console.log("Ошибка при проверке места в /tmp:", e);
+    }
     // Debug logging
     // console.log("Received body:", JSON.stringify(body, null, 2));
     // console.log("inputProps:", JSON.stringify(body.inputProps, null, 2));
