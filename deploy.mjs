@@ -51,6 +51,7 @@ const { functionName, alreadyExisted: functionAlreadyExisted } =
     region: REGION,
     timeoutInSeconds: TIMEOUT,
     diskSizeInMb: DISK,
+    runtime: "nodejs20.x", // Обновляем до Node.js 20 для совместимости
   });
 console.log(
   functionName,
