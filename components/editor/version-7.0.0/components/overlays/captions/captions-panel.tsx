@@ -6,7 +6,7 @@ import { useTimelinePositioning } from "../../../hooks/use-timeline-positioning"
 import { useTimeline } from "../../../contexts/timeline-context";
 import { CaptionOverlay, OverlayType, Caption } from "../../../types";
 import { CaptionSettings } from "./caption-settings";
-import { Upload, X } from "lucide-react";
+import { Upload, X, Mic, Sparkles } from "lucide-react";
 
 /**
  * Interface for word timing data from uploaded files
@@ -58,6 +58,7 @@ interface WordsFileData {
 export const CaptionsPanel: React.FC = () => {
   const [script, setScript] = useState("");
   const [isBannerVisible, setIsBannerVisible] = useState(true);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const {
     addOverlay,
     overlays,
@@ -151,6 +152,26 @@ export const CaptionsPanel: React.FC = () => {
   const handleUpdateOverlay = (updatedOverlay: CaptionOverlay) => {
     setLocalOverlay(updatedOverlay);
     changeOverlay(updatedOverlay.id, updatedOverlay);
+  };
+
+  const analyzeVideoAudio = async () => {
+    setIsAnalyzing(true);
+    try {
+      // TODO: Implement AI video analysis
+      // This will call Whisper API to analyze video audio
+      console.log("🎤 Analyzing video audio...");
+      
+      // Simulate API call for now
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // TODO: Process the response and generate captions
+      console.log("✅ Audio analysis complete!");
+      
+    } catch (error) {
+      console.error("❌ Error analyzing video:", error);
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -283,6 +304,41 @@ export const CaptionsPanel: React.FC = () => {
             </div>
 
             <div className="flex flex-col gap-4">
+              {/* AI Video Analysis Button */}
+              <div className="flex flex-col gap-2">
+                <Button
+                  variant="outline"
+                  className="w-full border-2 border-green-200 dark:border-green-700 
+                  hover:border-green-500/50 bg-green-50/50 dark:bg-green-900/10 
+                  hover:bg-green-100 dark:hover:bg-green-900/20 h-20 
+                  flex flex-col items-center justify-center gap-2 text-sm group transition-all duration-200"
+                  onClick={analyzeVideoAudio}
+                  disabled={isAnalyzing}
+                >
+                  {isAnalyzing ? (
+                    <div className="w-4 h-4 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Sparkles className="w-4 h-4 text-green-600 dark:text-green-400 group-hover:text-green-500 transition-colors" />
+                  )}
+                  <div className="flex flex-col items-center">
+                    <span className="text-green-600 dark:text-green-400 group-hover:text-green-700 dark:group-hover:text-green-300 font-medium">
+                      {isAnalyzing ? "Analyzing..." : "AI Video Analysis"}
+                    </span>
+                    <span className="text-xs text-green-500 dark:text-green-500 mt-1">
+                      Automatically generate captions from video audio
+                    </span>
+                  </div>
+                </Button>
+              </div>
+
+              <div className="relative">
+                <div className="absolute inset-x-0 -top-3 flex items-center justify-center">
+                  <span className="px-3 py-1 text-xs text-gray-600 dark:text-gray-500 bg-white dark:bg-gray-900 rounded-full border border-gray-200 dark:border-gray-800">
+                    or
+                  </span>
+                </div>
+              </div>
+
               <div className="flex flex-col gap-2">
                 <Button
                   variant="outline"
